@@ -9,6 +9,8 @@ import org.springframework.validation.annotation.Validated;
 public record MarqetaProperties(
         @NotBlank String baseUrl,
         @NotBlank String applicationToken,
-        @NotBlank String adminAccessToken
+        @NotBlank String adminAccessToken,
+        @NotBlank String cardProductToken,
+        @NotBlank String fundingSourceToken
 ) {
 }

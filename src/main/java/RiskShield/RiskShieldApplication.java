@@ -1,5 +1,4 @@
 package RiskShield;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -12,5 +11,6 @@ public class RiskShieldApplication {
         SpringApplication.run(RiskShieldApplication.class, args);
         System.out.print("hello world");
     }
+
 
 }
