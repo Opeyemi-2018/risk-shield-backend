@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface WebhookEventRepository extends JpaRepository<WebhookEvent, UUID> {
     boolean existsByEventCategoryAndEventToken(String eventCategory, String eventToken);
     List<WebhookEvent> findAllByEventCategoryAndProcessedFalseOrderByReceivedAtAsc(String eventCategory);
+    List<WebhookEvent> findAllByProcessedFalseOrderByReceivedAtAsc();
 }

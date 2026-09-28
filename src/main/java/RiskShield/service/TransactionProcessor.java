@@ -31,6 +31,8 @@ public class TransactionProcessor {
     private final UserRepository userRepository;
     private final CardRepository cardRepository;
     private final WebhookEventRepository webhookEventRepository;
+    private static final String CLEARING_TYPE = "authorization.clearing";
+    private static final String COMPLETED_STATE = "COMPLETION";
 
     @Transactional
     public boolean process(WebhookEvent webhookEvent) {
@@ -78,7 +80,23 @@ public class TransactionProcessor {
             transaction.setNetworkRiskScore(event.fraud().network().transactionRiskScore());
         }
 
+        if ("authorization".equals(event.type())
+                && transactionRepository.existsByPrecedingTransactionTokenAndType(event.token(), CLEARING_TYPE)) {
+            transaction.setState(COMPLETED_STATE);
+        }
+
         transactionRepository.save(transaction);
+
+// When a clearing arrives, mark the authorization it completes as settled.
+        if (CLEARING_TYPE.equals(event.type()) && event.precedingRelatedTransactionToken() != null) {
+            transactionRepository.findByMarqetaToken(event.precedingRelatedTransactionToken())
+                    .ifPresent(authorization -> {
+                        authorization.setState(COMPLETED_STATE);
+                        transactionRepository.save(authorization);
+                        log.info("Authorization {} completed by clearing {}",
+                                authorization.getMarqetaToken(), event.token());
+                    });
+        }
         webhookEvent.setProcessed(true);
         webhookEventRepository.save(webhookEvent);
 

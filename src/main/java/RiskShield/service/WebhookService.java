@@ -23,7 +23,8 @@ public class WebhookService {
     private final WebhookEventRepository webhookEventRepository;
     private final WebhookProperties webhookProperties;
     private final ObjectMapper objectMapper;
-    private final TransactionProcessor transactionProcessor; // NEW
+    private final TransactionProcessor transactionProcessor;
+    private final CardEventProcessor cardEventProcessor;
 
     public boolean isAuthorized(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
@@ -67,6 +68,30 @@ public class WebhookService {
         }
     }
 
+    public int reprocessPending() {
+        int processed = 0;
+        for (WebhookEvent event : webhookEventRepository.findAllByProcessedFalseOrderByReceivedAtAsc()) {
+            if (dispatch(event)) {
+                processed++;
+            }
+        }
+        return processed;
+    }
+
+    private boolean dispatch(WebhookEvent event) {
+        try {
+            return switch (event.getEventCategory()) {
+                case TransactionProcessor.TRANSACTIONS_CATEGORY -> transactionProcessor.process(event);
+                case CardEventProcessor.CARDS_CATEGORY -> cardEventProcessor.process(event);
+                default -> false; // stored for later; no processor for this category yet
+            };
+        } catch (Exception ex) {
+            log.error("Failed to process {} event {}: {}",
+                    event.getEventCategory(), event.getEventToken(), ex.getMessage());
+            return false;
+        }
+    }
+
     private void saveEvent(String category, Map<String, Object> event) {
         Object tokenValue = event.get("token");
         if (tokenValue == null) {
@@ -89,18 +114,10 @@ public class WebhookService {
                 .processed(false)
                 .build();
 
-        // CHANGED: save, then process transaction events right away
         try {
             WebhookEvent saved = webhookEventRepository.save(webhookEvent);
             log.info("Stored {} event {} (type: {})", category, token, saved.getEventType());
-
-            if (TransactionProcessor.TRANSACTIONS_CATEGORY.equals(category)) {
-                try {
-                    transactionProcessor.process(saved);
-                } catch (Exception ex) {
-                    log.error("Stored event {} but failed to process it: {}", token, ex.getMessage());
-                }
-            }
+            dispatch(saved);
         } catch (DataIntegrityViolationException ex) {
             log.info("Duplicate {} event {} ignored (concurrent delivery)", category, token);
         }

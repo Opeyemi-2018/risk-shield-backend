@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     Optional<Transaction> findByMarqetaToken(String marqetaToken);
     List<Transaction> findAllByUserIdOrderByTransactionTimeDesc(UUID userId);
+    boolean existsByPrecedingTransactionTokenAndType(String precedingTransactionToken, String type);
 }

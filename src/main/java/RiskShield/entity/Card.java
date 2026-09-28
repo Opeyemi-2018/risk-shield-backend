@@ -3,6 +3,7 @@ package RiskShield.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -51,4 +52,8 @@ public class Card {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    private String statusReason;
+
+    private Instant statusChangedAt;
 }
