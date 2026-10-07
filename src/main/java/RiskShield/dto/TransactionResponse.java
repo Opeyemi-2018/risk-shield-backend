@@ -18,7 +18,8 @@ public record TransactionResponse(
         String responseCode,
         String responseMemo,
         String cardLastFour,
-        Instant transactionTime
+        Instant transactionTime,
+        boolean synthetic
 ) {
     public static TransactionResponse from(Transaction t) {
         return new TransactionResponse(
@@ -33,7 +34,8 @@ public record TransactionResponse(
                 t.getResponseCode(),
                 t.getResponseMemo(),
                 t.getCard() != null ? t.getCard().getLastFour() : null,
-                t.getTransactionTime()
+                t.getTransactionTime(),
+                t.isSynthetic()
         );
     }
 }

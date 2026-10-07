@@ -1,6 +1,7 @@
 package RiskShield.repository;
 
 import RiskShield.entity.Card;
+import RiskShield.entity.CardStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -14,4 +15,5 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
     Optional<Card> findByMarqetaCardToken(String marqetaCardToken);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Card> findWithLockByMarqetaCardToken(String marqetaCardToken);
+    Optional<Card> findFirstByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, CardStatus status);
 }

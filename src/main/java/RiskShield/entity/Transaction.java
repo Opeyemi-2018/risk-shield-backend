@@ -73,6 +73,9 @@ public class Transaction {
     @Column(name = "preceding_transaction_token")
     private String precedingTransactionToken;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean synthetic;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

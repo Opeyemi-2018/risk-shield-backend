@@ -1,8 +1,6 @@
 package RiskShield.marqeta;
 
-import RiskShield.dto.MarqetaBalanceResponse;
-import RiskShield.dto.MarqetaGpaOrderRequest;
-import RiskShield.dto.MarqetaGpaOrderResponse;
+import RiskShield.dto.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -52,5 +50,21 @@ public class MarqetaClient {
                 .uri("/balances/{userToken}", userToken)
                 .retrieve()
                 .body(MarqetaBalanceResponse.class);
+    }
+
+    public MarqetaSimulationResponse simulateAuthorization(MarqetaSimulationRequest request) {
+        return restClient.post()
+                .uri("/simulations/cardtransactions/authorization")
+                .body(request)
+                .retrieve()
+                .body(MarqetaSimulationResponse.class);
+    }
+
+    public MarqetaSimulationResponse simulateClearing(MarqetaSimulationRequest request) {
+        return restClient.post()
+                .uri("/simulations/cardtransactions/authorization.clearing")
+                .body(request)
+                .retrieve()
+                .body(MarqetaSimulationResponse.class);
     }
 }

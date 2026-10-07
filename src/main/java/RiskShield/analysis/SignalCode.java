@@ -1,0 +1,11 @@
+package RiskShield.analysis;
+
+public enum SignalCode {
+    HIGH_AMOUNT_FOR_CATEGORY,
+    HIGH_AMOUNT_OVERALL,
+    NEW_CATEGORY,
+    NEW_MERCHANT,
+    UNUSUAL_TIME,
+    RAPID_PURCHASES,
+    LARGE_SHARE_OF_MONTHLY_SPEND
+}

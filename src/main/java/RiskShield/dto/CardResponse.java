@@ -11,6 +11,7 @@ public record CardResponse(
         String lastFour,
         String expiration,
         CardStatus status,
+        String statusReason,
         LocalDateTime createdAt
 ) {
     public static CardResponse from(Card card) {
@@ -19,6 +20,7 @@ public record CardResponse(
                 card.getLastFour(),
                 card.getExpiration(),
                 card.getStatus(),
+                card.getStatusReason(),
                 card.getCreatedAt()
         );
     }

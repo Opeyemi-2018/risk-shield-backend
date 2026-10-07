@@ -12,10 +12,12 @@ import RiskShield.marqeta.MarqetaUserResponse;
 import RiskShield.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,7 +30,6 @@ public class UserService {
 
     public UserResponse registerUser(CreateUserRequest request) {
         String email = request.email().trim().toLowerCase();
-
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException(email);
         }
@@ -68,5 +69,12 @@ public class UserService {
         return userRepository.findById(id)
                 .map(UserResponse::from)
                 .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+                .map(UserResponse::from)
+                .toList();
     }
 }

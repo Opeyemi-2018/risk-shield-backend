@@ -1,5 +1,6 @@
 package RiskShield.service;
 
+import RiskShield.analysis.InsightService;                    // NEW
 import RiskShield.entity.WebhookEvent;
 import RiskShield.repository.WebhookEventRepository;
 import RiskShield.webhook.WebhookProperties;
@@ -25,6 +26,7 @@ public class WebhookService {
     private final ObjectMapper objectMapper;
     private final TransactionProcessor transactionProcessor;
     private final CardEventProcessor cardEventProcessor;
+    private final InsightService insightService;              // NEW
 
     public boolean isAuthorized(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
@@ -78,10 +80,17 @@ public class WebhookService {
         return processed;
     }
 
+    // CHANGED: transactions now also get an insight evaluation after processing
     private boolean dispatch(WebhookEvent event) {
         try {
             return switch (event.getEventCategory()) {
-                case TransactionProcessor.TRANSACTIONS_CATEGORY -> transactionProcessor.process(event);
+                case TransactionProcessor.TRANSACTIONS_CATEGORY -> {
+                    boolean processed = transactionProcessor.process(event);
+                    if (processed) {
+                        evaluateInsightSafely(event.getEventToken());
+                    }
+                    yield processed;
+                }
                 case CardEventProcessor.CARDS_CATEGORY -> cardEventProcessor.process(event);
                 default -> false; // stored for later; no processor for this category yet
             };
@@ -89,6 +98,16 @@ public class WebhookService {
             log.error("Failed to process {} event {}: {}",
                     event.getEventCategory(), event.getEventToken(), ex.getMessage());
             return false;
+        }
+    }
+
+    // NEW
+    private void evaluateInsightSafely(String marqetaToken) {
+        try {
+            insightService.evaluateByMarqetaToken(marqetaToken);
+        } catch (Exception ex) {
+            // Analysis must never break transaction processing.
+            log.warn("Insight evaluation failed for transaction {}: {}", marqetaToken, ex.getMessage());
         }
     }
 

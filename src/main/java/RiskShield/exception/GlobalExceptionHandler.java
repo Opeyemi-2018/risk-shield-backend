@@ -50,4 +50,18 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMarqetaFailure(MarqetaIntegrationException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
+    @ExceptionHandler(NoActiveCardException.class)
+    public ProblemDetail handleNoActiveCard(NoActiveCardException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ProblemDetail handleTransactionNotFound(TransactionNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTransactionStateException.class)
+    public ProblemDetail handleInvalidTransactionState(InvalidTransactionStateException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
 }
